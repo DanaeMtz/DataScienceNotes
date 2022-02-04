@@ -1,0 +1,358 @@
+---
+title: "Machine Learning Interview Questions"
+author: "Danae Martinez"
+date: "`r format(Sys.time(), '%d %B %Y')`"
+
+output: 
+  html_document:
+    css: report_style.css
+    toc: true
+    toc_depth: 2
+    toc_float: true
+    number_sections: false
+---
+
+
+# Data preprocessing
+
+## Data transformation
+
+### Feature Scaling 
+
+1. Min-max scaling
+
+Takes each value minus the minimum and divides by the range. This has the effect of scaling the features between zero and one, $[0,1]$. 
+
+$$x'= \frac{x-\text{min}}{\text{max}-\text{min}}$$
+2. Standardization ($z$-score normalization)
+
+Takes each value minus the mean and divides it by the standard deviation, giving it a mean of zero, $\mu=0$ and variance one, $\sigma=1$.
+
+$$x'= \frac{x-\mu}{\sigma}$$
+**Remark**: min-max normalization ensures that all features will share the exact same scale but does not cope well with outliers. The $z$-score normalization, on the other hand, is more robust to outliers but produces normalized values in different scales.
+
+## Missing data 
+
+The way we handle missing data can introduce bias and lead to misleading results.
+
+1. Omission, removal of rows and/or columns.
+
+2. Imputation. The method that you choose, should depend on the type of missingness in the data.  
+
+- MCAR - Missing Completely at Random. The missingness has no association with any data you have observed, or not observed.
+
+- MAR - Missing At Random. Missingness depends on data you have observed, but not data unobserved. Deleting observations with this type of missing values is not appropriate, as you will likely bias your results.
+
+- MNAR - Missing Not At Random. MNAR is where the response missingness is related to an unobserved value relevant to the assessment of interest. MNAR introduces bias into the estimation of associations and parameters of interest.
+
+![](/home/danae/Documents/Git/interview_questions/missigness_types.png)
+Deletion should be considered as an option only is the data is MCAR and if it represents less than 5% of the volume. 
+
+### Imputation methods
+
+Impute the values from the missing variable 
+
+- as a linear function of the values of the other non missing variables.
+
+- using K-nearest neighbor model. A new sample is imputed by finding the samples in the data set “closest” to it and averages these nearby points to fill in the value.
+
+### Evaluating the quality of an imputation method
+
+Compare the distributions of the variables before and after the imputation in terms of their mean, variance and scale. Ideally, you want an imputation model that does not drastically change the distribution of the imputed variables or their relationships. 
+
+## Outliers 
+
+### Detect outliers 
+
+1. The $3\sigma$ rule. If your variable is normally distributed, you can label any observation 3 standard deviations above or below the mean as an outlier, given that its probability will be less than 0.1%.
+
+$$P(\mu - 3\sigma \leq x \leq \mu + 3\sigma) \approx 0.99$$
+
+2. The $1.5*\text{IQR}$ rule. Points above and/or below 1.5 times the IQR should be suspected as possible outliers. 
+
+$\text{IQR = Q3 - Q1}$
+
+### Handle outliers 
+
+1. Imputation : such as linear or KNN imputation. 
+2. Capping : replacing the low values with the 5-th percentile of the variable distribution, and the high values with the 95-th percentile. 
+3. Exclusion 
+4. Retention : choose algorithms that are robust to them, such as tree-based methods. 
+
+In certain contexts where the goal is to find fraud or cybersecurity events, for example, data anomalies are required in order to create a predictive ML model to detect them in the future. 
+
+In any case, you should use your domain knowledge to understand why these extreme observations are happening in your dataset, before deciding how to handle them. 
+
+## Feature engineering
+
+Engineered features extract additional information from the data, creates additional relevant features, and it is one of the most effective ways to improve predictive models.
+
+![ML pipeline](/home/danae/Documents/Git/interview_questions/ML_pipeline.png)
+
+![ML Preprocessing steps](/home/danae/Documents/Git/interview_questions/Preprocessing_ML.png)
+
+
+# Supervised Learning
+
+## Feature selection
+
+The motivation of feature selection 
+
+- Reduces overfitting by removing unimportant features
+- Improves accuracy since any potentially misleading data is removed
+- More model interpretability
+- Avoid Multicollinearity problems
+
+### Feature selection methods
+
+1. Filter methods : 
+
+- check the correlation between the independent variables and the target variable and remove highly correlated features.
+- perform ANOVA for the categorical independent variables. 
+- features with zero or near zero variance may be removed as they have little discriminative power.
+
+2. Wrapper methods : use an ML model to evaluate 
+  - Forward selection : sequentially adds features one at a time based on their model contribution,
+  - Backward elimination : start with all of the features and sequentially dropping features based on the least contribution in a given step,
+
+Wrapper methods, unfortunately, can easily overfit your training data and may be computationally demanding as they have to run the ML model for each candidate feature subset.
+
+3. Embedded methods : use learning algorithms that implicitly performs feature selection as part of its training. These methods can often return a ranking of the most important variables, such as Random Forests, Lasso regression and other tree-based methods. 
+
+
+## Regression: regularization
+
+Remember that in a regression scenario, the fitted model is the one minimizing the residual sum of squares.
+
+The residual sum of squares are defined as 
+$$\text{RSS} = (Y-X\beta)^T(Y-X\beta)$$
+The $\beta$ that minimizes RSS, is given by 
+$$\hat{\beta} = (X^{T}X)^{-1}X^{T}Y$$
+Typically, noisy data points in the training set will tend to create a more complex model, which is manifested in large coefficient estimates for some of the regressors. The regularization techniques are designed to reduce model complexity and help prevent over-fitting.
+
+1. L1-regularization or **Lasso**
+
+The Lasso regression coefficients are the $\hat{\beta}^{L}$ values that minimize
+
+$$\text{RSS} + \lambda\sum_{j} |\beta_j| $$
+Since L1 norm turns some coefficients to zero, it can be used as well for feature selection. 
+
+2. L2-regularization or **Ridge**
+
+Ridge regression modifies the RSS objective function by adding a shrinkage term, which penalizes large coefficients. This is called the L2 norm of the coefficient vector.
+
+The Ridge regression coefficients are the $\hat{\beta}^{R}$ values that minimize
+
+$$\text{RSS} + \lambda\sum_{j} \beta_j^2 $$
+The regularization parameter lambda decides how much we want to penalize the model complexity. 
+
+3. **ElasticNet**, combines L1 and L2 regularization 
+
+$$\text{RSS} + \lambda_1\sum_{j} |\beta_j| + \lambda_2\sum_{j} \beta_j^2$$
+
+## Bias and variance Trideoff 
+
+Bias and variance are two sources of error in Machine Learning. High bias means that your model did not learn the training data well, also called underfitting. High variance means your model learned noise in the training data, also called overfitting. The bias-variance tradeoff is then finding an adequate balance between model learning and model generalization.
+
+![Bias-Variance Tradeoff](/home/danae/Documents/Git/interview_questions/tradeoff.jpg)
+
+
+### Diagnose bias and variance problems
+
+Compute your training and test error.
+
+1. if your training error is quite low but the test error is high, then the model is overfitting
+2. if your training and testing errors are both high, this is a clear sign of underfitting. 
+
+Nevertheless, we can perform a better model evaluation with **Cross-Validation**
+
+- If $CV_{error} > TS_{error}$, then the model suffers from high variance. This means that the model overfits the training set and we should 
+decrease model complexity or gather more data if possible. For example, consider adding a regularization term. 
+
+- If $CV_{error} \approx TS_{error} >>$ desired error, then the model suffers from high bias. This means that the model underfits the 
+training set and we should increase the model complexity or gather more relevant features if possible. 
+
+## Ensemble methods 
+
+Used for both, classification and regression. 
+
+### Bagging (Bootstrap aggregation)
+
+Bootstrapping is a sampling technique where a subset of the data is selected with replacement. A model is built with each bootstrapped sample and the output predictions are averaged (or based on a majority vote criteria for classification problems)
+
+Bagging techniques have the advantage of reducing variance and then produce more accurate models. One popular example of bagging model is Random Forest. 
+![Bagging](/home/danae/Documents/Git/interview_questions/bagging.png)
+
+### Boosting
+
+Boosting also builds multiple individual models, but does so in a sequential order, learning to reduce predictive error from previous models by modifying the weights for incorrectly predicted instances which results in a model with decreased bias.
+
+The idea is that subsequent base learners help correct the mistakes from previous learners. Once no more base learners are needed, a weighted voting mechanism produces the ensemble's output. 
+
+AdaBoost and Gradient Boosted Trees are two popular boosting ensemble models.
+
+![Boosting](/home/danae/Documents/Git/interview_questions/boosting.png)
+
+### Model stacking
+
+Model stacking takes the predictions from individual models and combines them to create a higher accuracy model. As such, a stacking ensemble does not predict on the original dataset but on a transformed space composed of the base learner predictions. This is done by a supervisor or metalearner algorithm. Stacking typically achieves better performance than any base learner. 
+
+![Stacking](/home/danae/Documents/Git/interview_questions/Stacking.png)
+
+# Unsupervised Learning
+
+## Clustering 
+
+1. **K-means clustering**. Uses the Euclidean distance, that's why often some transformation, scaling or normalization on the data is required. 
+
+The number of clusters, $k$ is an hyperparameter. A rule of thumb to determine the optimal $k$ is to try all values in a certain range and compute the ratio of the WSS to the total sum of squares or TSS, then select the smallest K for which this ratio is below 0.2; this is known as the **elbow method** 
+
+- WSS - Within-Cluster Sum-of-Squares is a measure of the compactness of the clusters.
+
+- BSS - Between-Cluster Sum of Squares, measures the separation of the different clusters.
+
+
+Another popular method for determining the optimal value for $k$ is the silhouette method. 
+
+2. **Hierarchical clustering**. Connect observations to create clusters based on their distance.
+
+3. **t-SNE** : maps the data samples into 2d space so that the proximity of the samples to one another can be visualized.
+
+## Dimensionality reduction (feature extraction)
+
+Feature extraction is not the same as feature selection, but they are related in the sense that they both reduce the number of features in the dataset. 
+
+Those methods are used to reduce the dimensionality of your data by extracting new features from the original feature set. The new features are linear combinations of the existing features and as such, they do not bear a clear meaning to the problem at hand, so they cannot be easily interpreted. Those methods work better with normalized data and assume all features are continuous.
+
+1. Principal Component Analysis, PCA
+
+PCA generates a new set of orthogonal features, also called "principal components". These orthogonal features are uncorrelated and ranked in order of their "explained variance." The first principal component, PC1, explains the most variance in your dataset, PC2 explains the second-most variance, and so on. 
+
+2. Singular value decomposition, SVD
+
+## Anomaly detection 
+
+We can use clustering analysis to identify anomalies. 
+
+
+# Model selection and evaluation
+
+## Classification 
+
+### Confusion matrix 
+
+1. Precision, measures how often the model is correct when it predicts the positive class.
+
+$$\text{Precision} = \frac{TP}{TP + FP}$$
+
+2. Recall, measures how often a positive is predicted when an observation is positive.
+
+$$\text{Recall} = \frac{TP}{TP + FN}$$
+3. F1-score : weighted average of precision and recall, also called the harmonic mean of precision and recall.
+
+$$\text{F1-score} = 2*\frac{\text{Precision} * \text{Recall}}{\text{Precision + Recall}}$$
+
+4. Accuracy is the proportion of correctly classified examples. Helpful when all classes have the same misclassification cost. In class-imbalanced scenarios, however, this metric could be misleading.
+
+$$\text{Accuracy} = \frac{TP + TN}{TP + FP + FN + TN}$$
+![Confusion matrix](/home/danae/Documents/Git/interview_questions/confusion_matrix.png)
+
+### Imbalanced classification 
+
+Always split into train and test sets BEFORE trying oversampling techniques!
+
+1. Oversampling 
+2. Undersampling 
+
+## Regression 
+
+1. R-Squared is a statistical measure of fit that indicates how much variation of a dependent variable is explained by the independent variable(s) in a regression model.
+
+2. RMSE 
+
+## Estimating performance with cross validation 
+
+K-fold cross validation is a technique that provides K estimates of model performance. The training data is randomly partitioned into K sets of roughly equal size, known as folds, which are used to perform K iterations of model fitting and evaluation. 
+
+![cross validation](/home/danae/Documents/Git/interview_questions/grid_search_cross_validation .png)
+
+
+## Hyperparameter tuning
+
+There are three main strategies to tune hyperparameters: 
+
+1. Grid search. Conducts an exhaustive search over a manually specified subset of the hyperparameter space. All possible hyperparameter combinations in this sampled space are considered. This makes grid search expensive but highly parallelizable too.
+
+2. Random search, randomly selects hyperparameter vectors either from a discrete sample or from the continuous distribution of each hyperparameter. 
+3. Informed search
+
+
+# Common questions
+
+1. What to do if you model is still suffering from multicollinearity?
+  
+- consider adding a regularization tearm 
+- PCA, principal component analysis
+
+2. How do you ensure your model will perform well against test (unseen) data?
+How to avoir and reduce overfitting?
+
+- Consider usign Bootstrapping tecniques or a regularization tearm 
+- Perform K-fold cross-validation
+
+# NLP
+
+NLP is all about make sense of language using statistics and computers. Some of the problems that can be solve with NLP include: 
+
+1. Topic identification
+2. Text classification 
+
+Sentiment analysis is a special case of text classification, since the opinion can be positive, neutral or negative. Nonetheless it is also possible to consider that emotion could be quantitative (like rating a movie on the scale from 1 to 10).
+
+3. Translation 
+4. Chatbots
+
+## Text preprocessing 
+
+1. **Lowercasing**
+
+2. **Tokenization**, is the process of transforming a string or document into smaller chunks, which we call tokens, break out words or sentences, separate punctuation, etc.
+
+Tokenization can help us with some simple text processing tasks like mapping part of speech, matching common words and perhaps removing unwanted tokens like common words or repeated words.
+
+3. **Removing stop words**, which are common words in a language that don't carry a lot of meaning.
+
+4. **Lemmatization**, shorten the words to their root stems.
+
+5. **Bag of words**, used in topic identification and text classification. Bag of words is a very simple and basic method to finding topics in a text. For bag of words, you need to first create tokens using tokenization, and then count up all the tokens you have.
+
+The theory is that the more frequent a word or token is, the more central or important it might be to the text. Bag of words can be a great way to determine the significant words in a text based on the number of times they are used.
+
+5. **Tf-idf**, for term-frequncy - inverse document frequency. 
+
+Will take texts that share common language and ensure the most common words across the entire corpus don't show up as keywords. Tf-idf helps keep the document-specific frequent words weighted high and the common words across the entire corpus weighted low. These weights can help you determine good topics and keywords for a corpus with shared vocabulary.
+
+Remark : These methods can also be useful when we want to perform supervised learning with NLP. You can create supervised learning data from text by using bag of words models or Tf-idf as features.
+
+6. **NER**, name entity recognition.
+
+Named Entity Recognition or NER for short is a natural language processing task used to identify important named entities in the text, such as people, places and organizations.
+
+4. **Word vectors and similarity**
+
+Similarity is determined using word vectors, multi-dimensional representations of meanings of words. Training word vectors can take quite a bit of computer power and lots of data. Fortunately, there are high-quality word vectors available for anyone to use. 
+
+In the word vector space, it's the *direction* of the vectors which matters most. So the 'distance' we want to measure between words is actually related to the angle between the vectors. The metric that's typically used is the cosine similarity, which is equal to 1 if the vectors point in the same direction, 0 if they're perpendicular, and -1.
+
+## Chatbots and conversational software
+
+NLU, or natural language understanding is a subfield of natural language processing, NLP. In NLU, we need to identify the intent of the message, and extract a set of relevant entities.
+
+Recognizing intents is an example of a classification problem. Given an input (that is, a user message) we want to create an object, a classifier, which can predict a label (that is, the intent of the message)
+
+
+
+
+
+
+
