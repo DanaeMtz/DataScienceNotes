@@ -5,11 +5,12 @@ date: "`r format(Sys.time(), '%d %B %Y')`"
 
 output: 
   html_document:
-    css: report_style.css
+    # css: report_style.css
     toc: true
     toc_depth: 2
     toc_float: true
     number_sections: false
+
 ---
 
 
@@ -45,7 +46,7 @@ The way we handle missing data can introduce bias and lead to misleading results
 
 - MNAR - Missing Not At Random. MNAR is where the response missingness is related to an unobserved value relevant to the assessment of interest. MNAR introduces bias into the estimation of associations and parameters of interest.
 
-![](/home/danae/Documents/Git/interview_questions/missigness_types.png)
+<!-- ![](/home/danae/Documents/Git/interview_questions/missigness_types.png) -->
 Deletion should be considered as an option only is the data is MCAR and if it represents less than 5% of the volume. 
 
 ### Imputation methods
@@ -61,6 +62,7 @@ Impute the values from the missing variable
 Compare the distributions of the variables before and after the imputation in terms of their mean, variance and scale. Ideally, you want an imputation model that does not drastically change the distribution of the imputed variables or their relationships. 
 
 ## Outliers 
+
 
 ### Detect outliers 
 
@@ -87,9 +89,9 @@ In any case, you should use your domain knowledge to understand why these extrem
 
 Engineered features extract additional information from the data, creates additional relevant features, and it is one of the most effective ways to improve predictive models.
 
-![ML pipeline](/home/danae/Documents/Git/interview_questions/ML_pipeline.png)
+<!-- ![ML pipeline](/home/danae/Documents/Git/interview_questions/ML_pipeline.png) -->
 
-![ML Preprocessing steps](/home/danae/Documents/Git/interview_questions/Preprocessing_ML.png)
+<!-- ![ML Preprocessing steps](/home/danae/Documents/Git/interview_questions/Preprocessing_ML.png) -->
 
 
 # Supervised Learning
@@ -154,7 +156,7 @@ $$\text{RSS} + \lambda_1\sum_{j} |\beta_j| + \lambda_2\sum_{j} \beta_j^2$$
 
 Bias and variance are two sources of error in Machine Learning. High bias means that your model did not learn the training data well, also called underfitting. High variance means your model learned noise in the training data, also called overfitting. The bias-variance tradeoff is then finding an adequate balance between model learning and model generalization.
 
-![Bias-Variance Tradeoff](/home/danae/Documents/Git/interview_questions/tradeoff.jpg)
+<!-- ![Bias-Variance Tradeoff](/home/danae/Documents/Git/interview_questions/tradeoff.jpg) -->
 
 
 ### Diagnose bias and variance problems
@@ -181,7 +183,7 @@ Used for both, classification and regression.
 Bootstrapping is a sampling technique where a subset of the data is selected with replacement. A model is built with each bootstrapped sample and the output predictions are averaged (or based on a majority vote criteria for classification problems)
 
 Bagging techniques have the advantage of reducing variance and then produce more accurate models. One popular example of bagging model is Random Forest. 
-![Bagging](/home/danae/Documents/Git/interview_questions/bagging.png)
+<!-- ![Bagging](/home/danae/Documents/Git/interview_questions/bagging.png) -->
 
 ### Boosting
 
@@ -191,13 +193,13 @@ The idea is that subsequent base learners help correct the mistakes from previou
 
 AdaBoost and Gradient Boosted Trees are two popular boosting ensemble models.
 
-![Boosting](/home/danae/Documents/Git/interview_questions/boosting.png)
+<!-- ![Boosting](/home/danae/Documents/Git/interview_questions/boosting.png) -->
 
 ### Model stacking
 
 Model stacking takes the predictions from individual models and combines them to create a higher accuracy model. As such, a stacking ensemble does not predict on the original dataset but on a transformed space composed of the base learner predictions. This is done by a supervisor or metalearner algorithm. Stacking typically achieves better performance than any base learner. 
 
-![Stacking](/home/danae/Documents/Git/interview_questions/Stacking.png)
+<!-- ![Stacking](/home/danae/Documents/Git/interview_questions/Stacking.png) -->
 
 # Unsupervised Learning
 
@@ -255,7 +257,7 @@ $$\text{F1-score} = 2*\frac{\text{Precision} * \text{Recall}}{\text{Precision + 
 4. Accuracy is the proportion of correctly classified examples. Helpful when all classes have the same misclassification cost. In class-imbalanced scenarios, however, this metric could be misleading.
 
 $$\text{Accuracy} = \frac{TP + TN}{TP + FP + FN + TN}$$
-![Confusion matrix](/home/danae/Documents/Git/interview_questions/confusion_matrix.png)
+<!-- ![Confusion matrix](/home/danae/Documents/Git/interview_questions/confusion_matrix.png) -->
 
 ### Imbalanced classification 
 
@@ -274,7 +276,7 @@ Always split into train and test sets BEFORE trying oversampling techniques!
 
 K-fold cross validation is a technique that provides K estimates of model performance. The training data is randomly partitioned into K sets of roughly equal size, known as folds, which are used to perform K iterations of model fitting and evaluation. 
 
-![cross validation](/home/danae/Documents/Git/interview_questions/grid_search_cross_validation .png)
+<!-- ![cross validation](/home/danae/Documents/Git/interview_questions/grid_search_cross_validation .png) -->
 
 
 ## Hyperparameter tuning
